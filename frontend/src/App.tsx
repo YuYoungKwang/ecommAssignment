@@ -3,27 +3,41 @@ import { useEffect, useState } from "react";
 
 type ItemType = "lb" | "hs";
 
+interface ItemRow {
+  objectID: string;
+  platform_id: string;
+  start_date : string;
+  start_time : string;
+  product_cnt: number;
+  visit_cnt: string;
+  sales_cnt: string;
+  sales_amt: string;
+  title: string;
+  cid: number;
+}
 interface ItemsResponse {
   type: ItemType;
+  items: ItemRow[];
 }
 
 const apiItemsUrl = "http://localhost:3000/api/items";
 
-async function requestItems(type: ItemType) {
-  await axios.post<ItemsResponse>(apiItemsUrl, { type });
-
+async function requestItems(type: ItemType): Promise<ItemRow[]> {
+  const response = await axios.post<ItemsResponse>(apiItemsUrl, { type });
+   return response.data.items;
 }
 
 function App(){
 
   const [type, setType] = useState<ItemType>("lb");
 
+  const [items, setItems] = useState<ItemRow[]>([]);
   useEffect(() => {
     async function loadItems() {
 
       try {
-         await requestItems(type);
-       
+        const nextItems = await requestItems(type);
+        setItems(nextItems);
       } catch (error) {
         console.error(error);
       }
@@ -54,7 +68,42 @@ function App(){
           홈쇼핑
         </button>
       </div>
-
+      <div className="tableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>방송정보</th>
+                  <th>분류</th>
+                  <th>방송시간</th>
+                  <th className="number">조회수</th>
+                  <th className="number">판매량</th>
+                  <th className="number">매출액</th>
+                  <th className="number">상품수</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item) => (
+                  <tr key={item.objectID}>
+                    <td className="title">
+                      {item.title}
+                      <br />
+                      {item.platform_id}
+                    </td>
+                    <td>{item.cid}</td>
+                    <td>
+                      {item.start_date}
+                      <br/>
+                      {item.start_time}
+                    </td>
+                    <td className="number">{item.visit_cnt}</td>
+                    <td className="number">{item.sales_cnt}</td>
+                    <td className="number">{item.sales_amt}</td>
+                    <td className="number">{item.product_cnt}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
     </main>
   )
 }
