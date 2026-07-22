@@ -46,7 +46,7 @@ function getFormattedStartDatetime(datetime: string): FormattedStartDatetime {
   const hour = datetime.slice(-4, -2);
   const minute = datetime.slice(-2);
 
-  const date = new Date(year, month - 1, day);
+  const date = new Date(year+2000, month - 1, day);
   const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
   const weekday = weekdays[date.getDay()];
 
@@ -79,6 +79,7 @@ function getTopCategoryName(
   return category.name;
 }
 
+// 102nmyir71hrs.js
 const platforms: Record<string, PlatformInfo> = {
   baemin: {
             name: "배민라이브",
