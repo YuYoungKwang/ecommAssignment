@@ -6,6 +6,7 @@ const upstreamBaseUrl = "https://live.ecomm-data.com";
 
 export const upstreamApi = {
   items: `${upstreamBaseUrl}/api/assignment/list`,
+  categories: `${upstreamBaseUrl}/api/home/gnb`,
   domain: "live.ecomm-data.com",
 };
 

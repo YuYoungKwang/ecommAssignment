@@ -14,7 +14,9 @@ interface ItemRow {
   sales_amt: string;
   title: string;
   cid: number;
+  category_name: string;
 }
+
 interface ItemsResponse {
   type: ItemType;
   items: ItemRow[];
@@ -89,7 +91,7 @@ function App(){
                       <br />
                       {item.platform_id}
                     </td>
-                    <td>{item.cid}</td>
+                    <td>{item.category_name}</td>
                     <td>
                       {item.start_date}
                       <br/>

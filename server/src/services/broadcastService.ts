@@ -1,5 +1,6 @@
 import { postUpstreamJson, upstreamApi } from "../clients/upstreamClient.js";
 import type {
+  CategoryResponse,
   FormattedStartDatetime,
   HomeShoppingItem,
   ItemRow,
@@ -9,9 +10,24 @@ import type {
   MetricValue,
 } from "../types/broadcast.js";
 
+let cachedCategories: CategoryResponse["cats"] | null = null;
 
 async function getItems(type: ItemType): Promise<ItemsApiResponse> {
   return postUpstreamJson<ItemsApiResponse>(upstreamApi.items, { type });
+}
+
+async function getCategories(): Promise<CategoryResponse["cats"]> {
+  if (cachedCategories) {
+    return cachedCategories;
+  }
+
+  const data = await postUpstreamJson<CategoryResponse>(
+    upstreamApi.categories,
+    {},
+  );
+
+  cachedCategories = data.cats;
+  return cachedCategories;
 }
 
 function formatMetric(value: MetricValue | undefined): string {
@@ -39,8 +55,32 @@ function getFormattedStartDatetime(datetime: string): FormattedStartDatetime {
   };
 }
 
+function getTopCategoryName(
+  cid: number,
+  categories: CategoryResponse["cats"],
+) {
+  let category = categories[String(cid)];
+
+  if (!category) {
+    return String(cid);
+  }
+
+  while (category.pid !== null) {
+    const parent = categories[String(category.pid)];
+
+    if (!parent) {
+      break;
+    }
+
+    category = parent;
+  }
+
+  return category.name;
+}
+
 function liveToRow(
   item: LiveBroadcastItem,
+  categories: CategoryResponse["cats"],
 ): ItemRow {
   const startDatetime = getFormattedStartDatetime(item.datetime_start);
 
@@ -55,11 +95,13 @@ function liveToRow(
     sales_amt: formatMetric(item.sales_amt),
     title: item.title,
     cid: item.cid,
+    category_name: getTopCategoryName(item.cid, categories),
   };
 }
 
 function homeShoppingToRow(
   item: HomeShoppingItem,
+  categories: CategoryResponse["cats"],
 ): ItemRow {
   const startDatetime = getFormattedStartDatetime(item.hsshow_datetime_start);
 
@@ -74,28 +116,31 @@ function homeShoppingToRow(
     sales_amt: formatMetric(item.sales_amt),
     title: item.hsshow_title,
     cid: item.cid,
+    category_name: getTopCategoryName(item.cid, categories),
   };
 }
 
 function makeItemRows(
   type: ItemType,
   itemsResponse: ItemsApiResponse,
+  categories: CategoryResponse["cats"],
 ): ItemRow[] {
   const topTenItems = itemsResponse.list.slice(0, 10);
 
   if (type === "hs") {
     return topTenItems.map((item) =>
-      homeShoppingToRow(item as HomeShoppingItem),
+      homeShoppingToRow(item as HomeShoppingItem, categories),
     );
   }
 
   return topTenItems.map((item) =>
-    liveToRow(item as LiveBroadcastItem),
+    liveToRow(item as LiveBroadcastItem, categories),
   );
 }
 
 export async function getBroadcastRows(type: ItemType): Promise<ItemRow[]> {
   const itemsResponse = await getItems(type);
+  const categories = await getCategories();
 
-  return makeItemRows(type, itemsResponse);
+  return makeItemRows(type, itemsResponse, categories);
 }

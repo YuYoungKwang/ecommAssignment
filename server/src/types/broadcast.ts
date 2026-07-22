@@ -1,5 +1,16 @@
 export type ItemType = "lb" | "hs";
 
+export interface Category {
+  pid: number | null;
+  name: string;
+}
+
+export interface CategoryResponse {
+  cats: {
+    [cid: string]: Category;
+  };
+}
+
 // 날짜 시간 포멧 변경 저장
 export interface FormattedStartDatetime {
   date: string;
@@ -54,4 +65,5 @@ export interface ItemRow {
   sales_amt: string;        // 매출액
   title: string;            // 방송정보
   cid: number;              // 카테고리 id
+  category_name: string;
 }
