@@ -67,3 +67,9 @@ export interface ItemRow {
   cid: number;              // 카테고리 id
   category_name: string;
 }
+
+export interface PlatformInfo {
+  name: string;
+  short_name?: string;
+  no_crawl?: boolean;
+}
