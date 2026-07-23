@@ -34,14 +34,29 @@ function App(){
   const [type, setType] = useState<ItemType>("lb");
 
   const [items, setItems] = useState<ItemRow[]>([]);
+
+    // 데이터를 불러오는 중인지 저장합니다.
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 에러가 났을 때 화면에 보여줄 메시지입니다.
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const hasError = errorMessage !== "";
+  const hasItems = items.length > 0;
+
   useEffect(() => {
     async function loadItems() {
-
+      setIsLoading(true);
+      setErrorMessage("");
       try {
         const nextItems = await requestItems(type);
         setItems(nextItems);
       } catch (error) {
         console.error(error);
+        setItems([]);
+        setErrorMessage("목록을 불러오지 못했습니다.");
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -70,6 +85,17 @@ function App(){
           홈쇼핑
         </button>
       </div>
+        {isLoading && <p className="state">불러오는 중입니다.</p>}
+
+        {!isLoading && hasError && (
+          <p className="state error">{errorMessage}</p>
+        )}
+
+        {!isLoading && !hasError && !hasItems && (
+          <p className="state">표시할 데이터가 없습니다.</p>
+        )}
+
+        {!isLoading && !hasError && hasItems && (
       <div className="tableWrap">
             <table>
               <thead>
@@ -105,7 +131,7 @@ function App(){
                 ))}
               </tbody>
             </table>
-          </div>
+          </div>)}
     </main>
   )
 }
