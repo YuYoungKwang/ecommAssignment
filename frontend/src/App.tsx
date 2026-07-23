@@ -1,8 +1,10 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
+// 라방, 홈쇼핑 토글시 서버에 보내는 타입
 type ItemType = "lb" | "hs";
 
+// 서버에서 응답 받는 테이블 row
 interface ItemRow {
   objectID: string;
   platform_id: string;
@@ -17,33 +19,41 @@ interface ItemRow {
   category_name: string;
 }
 
+// 서버에서 응답
 interface ItemsResponse {
   type: ItemType;
   items: ItemRow[];
 }
 
+// 방송 데이터 요청 주소
 const apiItemsUrl = "http://localhost:3000/api/items";
 
+// 데이터 요청 함수 리턴 : ItemRow[]
 async function requestItems(type: ItemType): Promise<ItemRow[]> {
   const response = await axios.post<ItemsResponse>(apiItemsUrl, { type });
    return response.data.items;
 }
 
 function App(){
-
+  // 초기 토글 라방으로 설정
   const [type, setType] = useState<ItemType>("lb");
 
+  // 서버에서 받아온 방송 데이터 row
   const [items, setItems] = useState<ItemRow[]>([]);
 
-    // 데이터를 불러오는 중인지 저장합니다.
+  // 데이터를 불러오는 중인지 저장
   const [isLoading, setIsLoading] = useState(true);
 
-  // 에러가 났을 때 화면에 보여줄 메시지입니다.
+  // 에러가 났을 때 화면에 보여줄 메시지
   const [errorMessage, setErrorMessage] = useState("");
 
+  // 에러메세지가 있을경우 true
   const hasError = errorMessage !== "";
+
+  // 데이터 row가 있는경우 true
   const hasItems = items.length > 0;
 
+  // 라방, 홈쇼핑 탭 토글시 데이터 받아오기
   useEffect(() => {
     async function loadItems() {
       setIsLoading(true);

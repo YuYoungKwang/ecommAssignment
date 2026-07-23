@@ -1,10 +1,14 @@
+//라방, 홈쇼핑 목록
 export type ItemType = "lb" | "hs";
 
+// 특정 cid 카테고리 응답 내부
 export interface Category {
+  // pid가 null일 경우 최상위 카테고리
   pid: number | null;
   name: string;
 }
 
+// 카테고리 전체 응답 
 export interface CategoryResponse {
   cats: {
     [cid: string]: Category;
@@ -68,6 +72,7 @@ export interface ItemRow {
   category_name: string;
 }
 
+// 방송 플랫폼 정보
 export interface PlatformInfo {
   name: string;
   short_name?: string;

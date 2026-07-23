@@ -11,13 +11,17 @@ import type {
   MetricValue,
 } from "../types/broadcast.js";
 
+// 카테고리가 메모리에 있는지 확인
 let cachedCategories: CategoryResponse["cats"] | null = null;
 
+// 라방 / 홈쇼핑 데이터를 가져오는 함수
 async function getItems(type: ItemType): Promise<ItemsApiResponse> {
   return postUpstreamJson<ItemsApiResponse>(upstreamApi.items, { type });
 }
 
+// 카테고리 목록을 가져오는 함수
 async function getCategories(): Promise<CategoryResponse["cats"]> {
+  // null인경우 false처럼 취급
   if (cachedCategories) {
     return cachedCategories;
   }
@@ -31,6 +35,7 @@ async function getCategories(): Promise<CategoryResponse["cats"]> {
   return cachedCategories;
 }
 
+// 데이터가 마스킹되어 있는경우 "🔒 로그인"로 변경
 function formatMetric(value: MetricValue | undefined): string {
   if (value === null || value === undefined) {
     return "🔒 로그인";
@@ -39,6 +44,7 @@ function formatMetric(value: MetricValue | undefined): string {
   return String(value);
 }
 
+// 방송 날짜 포멧 변경
 function getFormattedStartDatetime(datetime: string): FormattedStartDatetime {
   const year = Number(datetime.slice(datetime.length - 10, -8));
   const month = Number(datetime.slice(-8, -6));
@@ -56,6 +62,7 @@ function getFormattedStartDatetime(datetime: string): FormattedStartDatetime {
   };
 }
 
+// 최상위 카테고리 가져오는 함수
 function getTopCategoryName(
   cid: number,
   categories: CategoryResponse["cats"],
@@ -80,8 +87,9 @@ function getTopCategoryName(
 }
 
 // 102nmyir71hrs.js
+// 플렛폼 네임 정보
 const platforms: Record<string, PlatformInfo> = {
-  baemin: {
+        baemin: {
             name: "배민라이브",
             no_crawl: true
         },
@@ -195,10 +203,12 @@ const platforms: Record<string, PlatformInfo> = {
         }
 };
 
+// 플렛폼 네임을 가져오는 함수
 function getPlatformName(platformId: string): string {
   return platforms[platformId]?.name ?? "-";
 }
 
+// 라방 데이터를 프론트엔드 테이블 모양으로 바꾸는 함수
 function liveToRow(
   item: LiveBroadcastItem,
   categories: CategoryResponse["cats"],
@@ -220,6 +230,7 @@ function liveToRow(
   };
 }
 
+// 홈쇼핑 데이터를 프론트엔드 테이블 모양으로 바꾸는 함수
 function homeShoppingToRow(
   item: HomeShoppingItem,
   categories: CategoryResponse["cats"],
@@ -241,6 +252,7 @@ function homeShoppingToRow(
   };
 }
 
+//응답받은 데이터를 10개로 잘라서 프론트엔드 테이블에 맞게 데이터를 가공하는 함수를 호출
 function makeItemRows(
   type: ItemType,
   itemsResponse: ItemsApiResponse,
@@ -259,6 +271,8 @@ function makeItemRows(
   );
 }
 
+//메인 함수
+//방송, 카테고리 데이터를 받은뒤 프론트엔드 테이블 형식으로 가공 후 반환
 export async function getBroadcastRows(type: ItemType): Promise<ItemRow[]> {
   const itemsResponse = await getItems(type);
   const categories = await getCategories();

@@ -2,6 +2,7 @@ import axios from "axios";
 import { wrapper } from "axios-cookiejar-support";
 import { CookieJar } from "tough-cookie";
 
+// 외부 api 주소
 const upstreamBaseUrl = "https://live.ecomm-data.com";
 
 export const upstreamApi = {
@@ -10,6 +11,7 @@ export const upstreamApi = {
   domain: "live.ecomm-data.com",
 };
 
+// 쿠키 저장소
 const cookieJar = new CookieJar();
 const upstreamClient = wrapper(
   axios.create({
@@ -19,6 +21,7 @@ const upstreamClient = wrapper(
   }),
 );
 
+//외부 api  호출
 export async function postUpstreamJson<ResponseData>(
   url: string,
   body: object,

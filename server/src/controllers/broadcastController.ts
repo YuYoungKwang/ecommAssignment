@@ -2,11 +2,12 @@ import type { Request, Response } from "express";
 import { getBroadcastRows } from "../services/broadcastService.js";
 import type { ItemType } from "../types/broadcast.js";
 
-
+// 타입 정합성 확인 함수
 function isItemType(value: unknown): value is ItemType {
   return value === "lb" || value === "hs";
 }
 
+//라우터에서 getBroadcastItems 호출시 타입 확인후 getBroadcastRows 함수 호출
 export async function getBroadcastItems(request: Request, response: Response) {
   const type = request.body.type;
 
